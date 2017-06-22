@@ -7,6 +7,8 @@ chcp 1251 > nul
 set "?~dp0=%~dp0"
 set "?~nx0=%~nx0"
 set ?01=^^^|
+set TAB={\u0009}
+set "EOLTAB=	"
 
 set "SETUP_ROOT=%~dp0"
 set "SETUP_ROOT=%SETUP_ROOT:~0,-1%"
@@ -19,8 +21,8 @@ if not exist %CECHO% (
 
 
 set "TARGETS_LIST=PlatformA1 PlatformA2 PlatformB PlatformC1 PlatformD1 PlatformD2 PlatformD3"
-set "TARGETS_SEPARATOR_LIST=	|	|	|	|	|	|	"
-set "ALL_IN_ONE_SEPARATOR0=	"
+set "TARGETS_SEPARATOR_LIST=%TAB%|%TAB%|%TAB%|%TAB%|%TAB%|%TAB%|%TAB%"
+set "ALL_IN_ONE_SEPARATOR0=%TAB%"
 
 rem MUST BE ALWAYS QUOTED AS INTRODUCED!
 set "TARGET_DESC.PlatformA1=ApplicationX_v5 description for PlatformA1"
@@ -96,7 +98,7 @@ set "PREINSTALL_REVERT_STORE_DIR=%TEMP_BASE_DIR%\%PREINSTALL_DIR_PATH_DECORATED%
 
 rem read the date and time
 set "PREINSTALL_DATETIME="
-for /F "usebackq eol=	 tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^> nul`) do if "%%i" == "LocalDateTime" set "PREINSTALL_DATETIME=%%j"
+for /F "usebackq eol=%EOLTAB% tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^> nul`) do if "%%i" == "LocalDateTime" set "PREINSTALL_DATETIME=%%j"
 
 if "%PREINSTALL_DATETIME%" == "" goto PREINSTALL_DATETIME_END
 
@@ -179,7 +181,7 @@ echo.
 
 set REVERT_REV_INDEX=0
 set REVERT_REVISION_MAX=1
-for /F "usebackq eol=	 tokens=* delims=" %%i in (`dir /A:D /B "%PREINSTALL_REVERT_STORE_DIR%\????_??_??.??_??_??_???"`) do (
+for /F "usebackq eol=%EOLTAB% tokens=* delims=" %%i in (`dir /A:D /B "%PREINSTALL_REVERT_STORE_DIR%\????_??_??.??_??_??_???"`) do (
   set REVERT_DIR=%%i
   call :SET_REVERT_DIR
 )
@@ -205,7 +207,7 @@ if not exist "%PREINSTALL_REVERT_STORE_DIR%\%REVERT_DIR%" goto REVERT_DIR_ERROR
 
 rem directory should has files or directories to revert
 set "REVERT_DIR_FIRST="
-for /F "usebackq eol=	 tokens=* delims=" %%i in (`dir /B "%PREINSTALL_REVERT_STORE_DIR%\%REVERT_DIR%"`) do set "REVERT_DIR_FIRST=%%i"
+for /F "usebackq eol=%EOLTAB% tokens=* delims=" %%i in (`dir /B "%PREINSTALL_REVERT_STORE_DIR%\%REVERT_DIR%"`) do set "REVERT_DIR_FIRST=%%i"
 if "%REVERT_DIR_FIRST%" == "" goto REVERT_DIR_ERROR
 
 goto REVERT_DIR_OK
@@ -230,7 +232,7 @@ echo.Reverting...
 set "SCRIPT_SELF_REVERT_FROM_PATH="
 set "SCRIPT_SELF_REVERT_TO_PATH="
 
-for /F "usebackq eol=	 tokens=* delims=" %%i in (`dir /B "%PREINSTALL_REVERT_STORE_DIR%\%REVERT_DIR%\"`) do (
+for /F "usebackq eol=%EOLTAB% tokens=* delims=" %%i in (`dir /B "%PREINSTALL_REVERT_STORE_DIR%\%REVERT_DIR%\"`) do (
   set FILE_PATH=%%i
   call :REVERT_FILE_PATH
 )
@@ -303,8 +305,8 @@ mkdir "%TEMP_PREINSTALL_DIR%\"
 rem --------------------------------------------------------------------------------
 
 call :PRINT_SELECT_TARGET
-call %%CECHO%% ^({06}a{#}^) all_in_one %%ALL_IN_ONE_SEPARATOR0%%- %%TARGET_DESC.all_in_one%%{\n}
-call %%CECHO%% ^({06}c{#}^) [{0F}EN{#}] {06}Cancel{#} %%?01%% [{0F}RU{#}] {06}Отмена{#}{\n}
+%CECHO% ^({06}a{#}^) all_in_one %ALL_IN_ONE_SEPARATOR0%- %TARGET_DESC.all_in_one%{\n}
+%CECHO% ^({06}c{#}^) [{0F}EN{#}] {06}Cancel{#} %?01% [{0F}RU{#}] {06}Отмена{#}{\n}
 goto PRINT_SELECT_TARGET_END
 
 :PRINT_SELECT_TARGET
@@ -317,10 +319,10 @@ echo.
 
 :PRINT_SELECT_TARGET_LOOP
 set "TARGET_NAME="
-for /F "eol=	 tokens=%TARGET_INDEX% delims= " %%i in ("%TARGETS_LIST%") do set "TARGET_NAME=%%i"
+for /F "eol=%EOLTAB% tokens=%TARGET_INDEX% delims= " %%i in ("%TARGETS_LIST%") do set "TARGET_NAME=%%i"
 
 set "TARGET_SEPARATOR0="
-for /F "eol=	 tokens=%TARGET_INDEX% delims=|" %%i in ("%TARGETS_SEPARATOR_LIST%") do set "TARGET_SEPARATOR0=%%i"
+for /F "eol=%EOLTAB% tokens=%TARGET_INDEX% delims=|" %%i in ("%TARGETS_SEPARATOR_LIST%") do set "TARGET_SEPARATOR0=%%i"
 
 if "%TARGET_NAME%" == "" (
   set /A NUM_TARGETS=%TARGET_INDEX%-1
@@ -361,12 +363,12 @@ if %TARGET_INDEX_OK% EQU 0 (
 ) >&2
 
 set "TARGET_NAME="
-for /F "eol=	 tokens=%TARGET_INDEX% delims= " %%i in ("%TARGETS_LIST%") do set "TARGET_NAME=%%i"
+for /F "eol=%EOLTAB% tokens=%TARGET_INDEX% delims= " %%i in ("%TARGETS_LIST%") do set "TARGET_NAME=%%i"
 
 :TARGET_NAME_SELECT_END
 
 call :PRINT_SELECT_APP_TARGET
-call %%CECHO%% ^({06}c{#}^) [{0F}EN{#}] {06}Cancel{#} %%?01%% [{0F}RU{#}] {06}Отмена{#}{\n}
+%CECHO% ^({06}c{#}^) [{0F}EN{#}] {06}Cancel{#} %?01% [{0F}RU{#}] {06}Отмена{#}{\n}
 goto PRINT_SELECT_APP_TARGET_END
 
 rem --------------------------------------------------------------------------------
@@ -381,13 +383,13 @@ echo.
 
 :PRINT_SELECT_APP_TARGET_LOOP
 set "ROOTSETUP.APP_TARGET_NAME="
-for /F "eol=	 tokens=%ROOTSETUP.APP_TARGET_INDEX% delims= " %%i in ("%ROOTSETUP.APP_TARGETS_LIST%") do set "ROOTSETUP.APP_TARGET_NAME=%%i"
+for /F "eol=%EOLTAB% tokens=%ROOTSETUP.APP_TARGET_INDEX% delims= " %%i in ("%ROOTSETUP.APP_TARGETS_LIST%") do set "ROOTSETUP.APP_TARGET_NAME=%%i"
 
 set "ROOTSETUP.APP_TARGET_DESC_NAME="
-for /F "eol=	 tokens=%ROOTSETUP.APP_TARGET_INDEX% delims= " %%i in ("%ROOTSETUP.APP_TARGETS_DESC_LIST%") do set "ROOTSETUP.APP_TARGET_DESC_NAME=%%i"
+for /F "eol=%EOLTAB% tokens=%ROOTSETUP.APP_TARGET_INDEX% delims= " %%i in ("%ROOTSETUP.APP_TARGETS_DESC_LIST%") do set "ROOTSETUP.APP_TARGET_DESC_NAME=%%i"
 
 set "ROOTSETUP.APP_TARGET_SEPARATOR0="
-for /F "eol=	 tokens=%ROOTSETUP.APP_TARGET_INDEX% delims=|" %%i in ("%ROOTSETUP.APP_TARGETS_SEPARATOR_LIST%") do set "ROOTSETUP.APP_TARGET_SEPARATOR0=%%i"
+for /F "eol=%EOLTAB% tokens=%ROOTSETUP.APP_TARGET_INDEX% delims=|" %%i in ("%ROOTSETUP.APP_TARGETS_SEPARATOR_LIST%") do set "ROOTSETUP.APP_TARGET_SEPARATOR0=%%i"
 
 if "%ROOTSETUP.APP_TARGET_NAME%" == "" (
   set /A ROOTSETUP.NUM_APP_TARGETS=%ROOTSETUP.APP_TARGET_INDEX%-1
@@ -423,7 +425,7 @@ if %ROOTSETUP.APP_TARGET_INDEX_OK% EQU 0 (
 ) >&2
 
 set "ROOTSETUP.APP_TARGET_NAME="
-for /F "eol=	 tokens=%ROOTSETUP.APP_TARGET_INDEX% delims= " %%i in ("%ROOTSETUP.APP_TARGETS_LIST%") do set "ROOTSETUP.APP_TARGET_NAME=%%i"
+for /F "eol=%EOLTAB% tokens=%ROOTSETUP.APP_TARGET_INDEX% delims= " %%i in ("%ROOTSETUP.APP_TARGETS_LIST%") do set "ROOTSETUP.APP_TARGET_NAME=%%i"
 
 :APP_TARGET_NAME_SELECT_END
 
@@ -737,7 +739,7 @@ call :RMDIR "%%SETUP_ROOT%%\%%APP_TARGET_DIR_TO_REMOVE%%"
 exit /b 0
 
 :PROCESS_SETUPS_EXE
-for /F "usebackq eol=	 tokens=* delims=" %%i in (`dir "%SETUP_ROOT%\*.exe.dat" /A:-D /B /S 2^> nul`) do ( call :PROCESS_SETUP_EXE "%%i" || goto CANCEL )
+for /F "usebackq eol=%EOLTAB% tokens=* delims=" %%i in (`dir "%SETUP_ROOT%\*.exe.dat" /A:-D /B /S 2^> nul`) do ( call :PROCESS_SETUP_EXE "%%i" || goto CANCEL )
 echo.
 goto PROCESS_SETUPS_EXE_END
 
@@ -755,7 +757,7 @@ exit /b 0
 :PROCESS_SETUPS_EXE_END
 
 :PROCESS_SETUPS_INI
-for /F "usebackq eol=	 tokens=* delims=" %%i in (`dir "%SETUP_ROOT%\setup.ini" /A:-D /B /S 2^> nul`) do ( call :PROCESS_SETUP_INI "%%i" || goto CANCEL )
+for /F "usebackq eol=%EOLTAB% tokens=* delims=" %%i in (`dir "%SETUP_ROOT%\setup.ini" /A:-D /B /S 2^> nul`) do ( call :PROCESS_SETUP_INI "%%i" || goto CANCEL )
 goto PROCESS_SETUPS_INI_END
 
 :PROCESS_SETUP_INI
@@ -787,7 +789,7 @@ if %FILE_CREATED% EQU 0 (
   exit /b 1
 )
 
-for /F "usebackq eol=	 tokens=* delims=" %%i in ("%SETUP_INI_DIR%\%SETUP_INI_FILE%.tmp") do ( call :PROCESS_COPY_WITH_SUBST_FILE_LINE "%%i" || goto :EOF )
+for /F "usebackq eol=%EOLTAB% tokens=* delims=" %%i in ("%SETUP_INI_DIR%\%SETUP_INI_FILE%.tmp") do ( call :PROCESS_COPY_WITH_SUBST_FILE_LINE "%%i" || goto :EOF )
 
 del /A:-D /F /Q "%SETUP_INI_DIR%\%SETUP_INI_FILE%.tmp"
 
