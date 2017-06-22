@@ -32,26 +32,26 @@ set "TARGET_DESC.PlatformD2=ApplicationX_v6 description for PlatformD2"
 set "TARGET_DESC.PlatformD3=ApplicationX_v6 description for PlatformD3"
 set "TARGET_DESC.all_in_one=Select platform at setup execution"
 
-set "APPA.APP_TARGETS_LIST=PlatformA PlatformB PlatformC PlatformD"
-set "APPA.PlatformA.TARGETS_LIST=PlatformA1 PlatformA2"
-set "APPA.PlatformB.TARGETS_LIST=PlatformB"
-set "APPA.PlatformC.TARGETS_LIST=PlatformC1"
-set "APPA.PlatformD.TARGETS_LIST=PlatformD1 PlatformD2 PlatformD3"
+set "APPX.APP_TARGETS_LIST=PlatformA PlatformB PlatformC PlatformD"
+set "APPX.PlatformA.TARGETS_LIST=PlatformA1 PlatformA2"
+set "APPX.PlatformB.TARGETS_LIST=PlatformB"
+set "APPX.PlatformC.TARGETS_LIST=PlatformC1"
+set "APPX.PlatformD.TARGETS_LIST=PlatformD1 PlatformD2 PlatformD3"
 
 rem MUST BE ALWAYS QUOTED AS INTRODUCED!
-set APPA.PlatformA.FILE_LIST_TO_REMOVE_EXCLUDE_PTTNS="ApplicationX_v5\SetupApplicationX_v5_%%APP_TARGET_NAME%%.exe.*" ^
+set APPX.PlatformA.FILE_LIST_TO_REMOVE_EXCLUDE_PTTNS="ApplicationX_v5\SetupApplicationX_v5_%%APP_TARGET_NAME%%.exe.*" ^
   "ApplicationX_v5\ApplicationX_v5_%%APP_TARGET_NAME%%.7z"
-set APPA.PlatformB.FILE_LIST_TO_REMOVE_EXCLUDE_PTTNS="ApplicationX_v5\SetupApplicationX_v5_%%APP_TARGET_NAME%%.exe.*" ^
+set APPX.PlatformB.FILE_LIST_TO_REMOVE_EXCLUDE_PTTNS="ApplicationX_v5\SetupApplicationX_v5_%%APP_TARGET_NAME%%.exe.*" ^
   "ApplicationX_v5\ApplicationX_v5_%%APP_TARGET_NAME%%.7z"
-set APPA.PlatformC.FILE_LIST_TO_REMOVE_EXCLUDE_PTTNS="ApplicationX_v6\SetupApplicationX_v6_%%APP_TARGET_NAME%%.exe.*" ^
+set APPX.PlatformC.FILE_LIST_TO_REMOVE_EXCLUDE_PTTNS="ApplicationX_v6\SetupApplicationX_v6_%%APP_TARGET_NAME%%.exe.*" ^
   "ApplicationX_v6\ApplicationX_v6_%%APP_TARGET_NAME%%.7z"
-set APPA.PlatformD.FILE_LIST_TO_REMOVE_EXCLUDE_PTTNS="ApplicationX_v6\SetupApplicationX_v6_%%APP_TARGET_NAME%%.exe.*" ^
+set APPX.PlatformD.FILE_LIST_TO_REMOVE_EXCLUDE_PTTNS="ApplicationX_v6\SetupApplicationX_v6_%%APP_TARGET_NAME%%.exe.*" ^
   "ApplicationX_v6\ApplicationX_v6_%%APP_TARGET_NAME%%.7z"
 
-set APPA.PlatformA.DIR_LIST_TO_REMOVE_INCLUDE_PTTNS="ApplicationX_v6"
-set APPA.PlatformB.DIR_LIST_TO_REMOVE_INCLUDE_PTTNS="ApplicationX_v6"
-set APPA.PlatformC.DIR_LIST_TO_REMOVE_INCLUDE_PTTNS="ApplicationX_v5"
-set APPA.PlatformD.DIR_LIST_TO_REMOVE_INCLUDE_PTTNS="ApplicationX_v5"
+set APPX.PlatformA.DIR_LIST_TO_REMOVE_INCLUDE_PTTNS="ApplicationX_v6"
+set APPX.PlatformB.DIR_LIST_TO_REMOVE_INCLUDE_PTTNS="ApplicationX_v6"
+set APPX.PlatformC.DIR_LIST_TO_REMOVE_INCLUDE_PTTNS="ApplicationX_v5"
+set APPX.PlatformD.DIR_LIST_TO_REMOVE_INCLUDE_PTTNS="ApplicationX_v5"
 
 set "ROOTSETUP.APP_TARGETS_LIST=ScenarioU ScenarioV"
 set "ROOTSETUP.APP_TARGETS_DESC_LIST=Scenario_U Scenario_V"
@@ -590,7 +590,7 @@ if %DELETE_NOT_RELATED_TO_TARGET_FILES_OK% EQU 0 goto DELETE_NOT_RELATED_TO_TARG
 
 rem process ApplicationX targets
 set "FOUND_APP_TARGET_NAME="
-set "APP_TARGET_PREFIX=APPA."
+set "APP_TARGET_PREFIX=APPX."
 call :PROCESS_PREFIX_PREINSTALL
 
 if not "%FOUND_APP_TARGET_NAME%" == "" call :DELETE_NOT_RELATED_TO_TARGET_FILES
