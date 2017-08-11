@@ -32,7 +32,8 @@ set "TARGET_DESC.PlatformC1=ApplicationX_v6 description for PlatformC1"
 set "TARGET_DESC.PlatformD1=ApplicationX_v6 description for PlatformD1"
 set "TARGET_DESC.PlatformD2=ApplicationX_v6 description for PlatformD2"
 set "TARGET_DESC.PlatformD3=ApplicationX_v6 description for PlatformD3"
-set "TARGET_DESC.all_in_one=Select platform at setup execution"
+set "TARGET_DESC.all_in_one[EN]={#}[{0F}EN{#}] {06}Select platform at setup execution{#}"
+set "TARGET_DESC.all_in_one[RU]={#}[{0F}RU{#}] {06}Выбор платформы в момент инсталляции{#}"
 
 set "APPX.APP_TARGETS_LIST=PlatformA PlatformB PlatformC PlatformD"
 set "APPX.PlatformA.TARGETS_LIST=PlatformA1 PlatformA2"
@@ -100,7 +101,7 @@ rem read the date and time
 set "PREINSTALL_DATETIME="
 for /F "usebackq eol=%EOLTAB% tokens=1,2 delims==" %%i in (`wmic os get LocalDateTime /VALUE 2^> nul`) do if "%%i" == "LocalDateTime" set "PREINSTALL_DATETIME=%%j"
 
-if "%PREINSTALL_DATETIME%" == "" goto PREINSTALL_DATETIME_END
+if not defined PREINSTALL_DATETIME goto PREINSTALL_DATETIME_END
 
 set "PREINSTALL_DATE=%PREINSTALL_DATETIME:~0,4%_%PREINSTALL_DATETIME:~4,2%_%PREINSTALL_DATETIME:~6,2%"
 set "PREINSTALL_TIME=%PREINSTALL_DATETIME:~8,2%_%PREINSTALL_DATETIME:~10,2%_%PREINSTALL_DATETIME:~12,2%_%PREINSTALL_DATETIME:~15,3%"
@@ -123,10 +124,10 @@ set FLAG_REVERT=0
 rem flags always at first
 set "FLAG=%~1"
 
-if not "%FLAG%" == "" ^
+if defined FLAG ^
 if not "%FLAG:~0,1%" == "-" set "FLAG="
 
-if not "%FLAG%" == "" (
+if defined FLAG (
   if "%FLAG%" == "-u" (
     set FLAG_U=1
     shift
@@ -196,19 +197,19 @@ set "REVERT_TYPE_INDEX="
 set /P REVERT_TYPE_INDEX= Type the number or label^> 
 echo.
 
-if "%REVERT_TYPE_INDEX%" == "" goto IGNORE_REVERT_TYPE_INDEX_CHECK
+if not defined REVERT_TYPE_INDEX goto IGNORE_REVERT_TYPE_INDEX_CHECK
 
 if %REVERT_TYPE_INDEX% GEQ 1 if %REVERT_TYPE_INDEX% LEQ %REVERT_REVISION_MAX% set REVERT_INDEX_OK=1
 
 call set "REVERT_DIR=%%REVERT_DIR_%REVERT_TYPE_INDEX%%%"
 
-if "%REVERT_DIR%" == "" goto REVERT_DIR_ERROR
+if not defined REVERT_DIR goto REVERT_DIR_ERROR
 if not exist "%PREINSTALL_REVERT_STORE_DIR%\%REVERT_DIR%" goto REVERT_DIR_ERROR
 
 rem directory should has files or directories to revert
 set "REVERT_DIR_FIRST="
 for /F "usebackq eol=%EOLTAB% tokens=* delims=" %%i in (`dir /B "%PREINSTALL_REVERT_STORE_DIR%\%REVERT_DIR%"`) do set "REVERT_DIR_FIRST=%%i"
-if "%REVERT_DIR_FIRST%" == "" goto REVERT_DIR_ERROR
+if not defined REVERT_DIR_FIRST goto REVERT_DIR_ERROR
 
 goto REVERT_DIR_OK
 :REVERT_DIR_ERROR
@@ -304,8 +305,81 @@ mkdir "%TEMP_PREINSTALL_DIR%\"
 
 rem --------------------------------------------------------------------------------
 
+set "ROOTSETUP_HKLM_REG_KEY="
+set "ROOTSETUP_TARGET_NAME="
+
+rem read HKLM key from HKCU
+for /F "usebackq eol=	 tokens=* delims=" %%i in (`reg.exe query "HKCU\Software\MySoftware\RootSetup" /v SetupRegKey 2^>nul`) do (
+  set "REGSTR=%%i"
+  call :PROCESS_REGISTRY_HKCU_TARGET_NAME
+)
+
+if not defined ROOTSETUP_HKLM_REG_KEY goto PROCESS_REGISTRY_HKLM_TARGET_NAME_END
+
+goto PROCESS_REGISTRY_HKCU_TARGET_NAME_END
+
+:PROCESS_REGISTRY_HKCU_TARGET_NAME
+if not defined REGSTR exit /b 0
+if not "%REGSTR:~0,15%" == "    SetupRegKey" exit /b 0
+
+for /F "eol=	 tokens=1,* delims= " %%i in ("%REGSTR%") do ^
+for /F "eol=	 tokens=1,* delims= " %%k in ("%%j") do set "ROOTSETUP_HKLM_REG_KEY=%%l"
+exit /b 0
+
+:PROCESS_REGISTRY_HKCU_TARGET_NAME_END
+if defined ROOTSETUP_HKLM_REG_KEY set "ROOTSETUP_HKLM_REG_KEY=\%ROOTSETUP_HKLM_REG_KEY%"
+
+if "%PROCESSOR_ARCHITECTURE%" == "AMD64" goto X64
+rem in case of wrong PROCESSOR_ARCHITECTURE value
+if defined PROCESSOR_ARCHITEW6432 goto NOTX64
+
+:X64
+set "ROOTSETUP_REG_KEY=HKLM%ROOTSETUP_HKLM_REG_KEY:\SOFTWARE\=\SOFTWARE\Wow6432Node\%"
+goto PRINT_REGISTRY_HKLM_TARGET_NAME
+
+:NOTX64
+set "ROOTSETUP_REG_KEY=HKLM%ROOTSETUP_HKLM_REG_KEY%"
+
+:PRINT_REGISTRY_HKLM_TARGET_NAME
+for /F "usebackq eol=	 tokens=* delims=" %%i in (`reg.exe query "%ROOTSETUP_REG_KEY%" /v TargetName 2^>nul`) do (
+  set "REGSTR=%%i"
+  call :PROCESS_REGISTRY_HKLM_TARGET_NAME
+)
+
+goto PROCESS_REGISTRY_HKLM_TARGET_NAME_END
+
+:PROCESS_REGISTRY_HKLM_TARGET_NAME
+if not defined REGSTR exit /b 0
+if not "%REGSTR:~0,14%" == "    TargetName" exit /b 0
+
+for /F "eol=	 tokens=1,* delims= " %%i in ("%REGSTR%") do ^
+for /F "eol=	 tokens=1,* delims= " %%k in ("%%j") do set "ROOTSETUP_TARGET_NAME=%%l"
+exit /b 0
+
+:PROCESS_REGISTRY_HKLM_TARGET_NAME_END
+
+if not defined ROOTSETUP_TARGET_NAME goto LAST_TARGET_NAME_NOT_FOUND
+
+%CECHO% [{0F}EN{#}] {0E}The last been installed platform name{#}: %TAB%"{0C}%ROOTSETUP_TARGET_NAME%{#}"{\n}
+%CECHO% [{0F}RU{#}] {0E}Последняя устанавливаемая платформа{#}: %TAB%"{0C}%ROOTSETUP_TARGET_NAME%{#}"{\n}
+%CECHO% {0F}--------------------------------------------------------------------------------{#}{\n}
+echo.
+
+goto LAST_TARGET_NAME_NOT_FOUND_END
+
+:LAST_TARGET_NAME_NOT_FOUND
+%CECHO% [{0F}EN{#}] {0E}The last been installed platform name is{#} {0C}NOT FOUND{#}.{\n}
+%CECHO% [{0F}RU{#}] {0E}Последняя устанавливаемая платформа{#} {0C}НЕ ОБНАРУЖЕНА{#}.{\n}
+%CECHO% {0F}--------------------------------------------------------------------------------{#}{\n}
+echo.
+
+:LAST_TARGET_NAME_NOT_FOUND_END
+
+rem --------------------------------------------------------------------------------
+
 call :PRINT_SELECT_TARGET
-%CECHO% ^({06}a{#}^) all_in_one %ALL_IN_ONE_SEPARATOR0%- %TARGET_DESC.all_in_one%{\n}
+%CECHO% ^({06}a{#}^) all_in_one %ALL_IN_ONE_SEPARATOR0%- %TARGET_DESC.all_in_one[EN]%{\n}
+%CECHO%                %ALL_IN_ONE_SEPARATOR0%  %TARGET_DESC.all_in_one[RU]%{\n}
 %CECHO% ^({06}c{#}^) [{0F}EN{#}] {06}Cancel{#} %?01% [{0F}RU{#}] {06}Отмена{#}{\n}
 goto PRINT_SELECT_TARGET_END
 
@@ -324,12 +398,22 @@ for /F "eol=%EOLTAB% tokens=%TARGET_INDEX% delims= " %%i in ("%TARGETS_LIST%") d
 set "TARGET_SEPARATOR0="
 for /F "eol=%EOLTAB% tokens=%TARGET_INDEX% delims=|" %%i in ("%TARGETS_SEPARATOR_LIST%") do set "TARGET_SEPARATOR0=%%i"
 
-if "%TARGET_NAME%" == "" (
+if not defined TARGET_NAME (
   set /A NUM_TARGETS=%TARGET_INDEX%-1
   exit /b 0
 )
 
-call %%CECHO%% ^({06}%%TARGET_INDEX%%{#}^) %%TARGET_NAME%% %%TARGET_SEPARATOR0%%- %%TARGET_DESC.%TARGET_NAME%%%{\n}
+set "TARGET_INDEX_CECHO_COLOR={06}"
+set "TARGET_NAME_CECHO_COLOR="
+set "TARGET_DESC_CECHO_COLOR="
+if defined ROOTSETUP_TARGET_NAME ^
+if "%ROOTSETUP_TARGET_NAME%" == "%TARGET_NAME%" (
+  set "TARGET_INDEX_CECHO_COLOR={0E}"
+  set "TARGET_NAME_CECHO_COLOR={0F}"
+  set "TARGET_DESC_CECHO_COLOR={0F}"
+)
+
+call %%CECHO%% ^(%%TARGET_INDEX_CECHO_COLOR%%%%TARGET_INDEX%%{#}^) %%TARGET_NAME_CECHO_COLOR%%%%TARGET_NAME%%{#} %%TARGET_SEPARATOR0%%- %%TARGET_DESC_CECHO_COLOR%%%%TARGET_DESC.%TARGET_NAME%%%{#}{\n}
 
 set /A TARGET_INDEX+=1
 
@@ -344,7 +428,7 @@ echo.
 
 set TARGET_INDEX_OK=0
 
-if "%TARGET_INDEX%" == "" goto CHECK_TARGET_INDEX
+if not defined TARGET_INDEX goto CHECK_TARGET_INDEX
 
 if "%TARGET_INDEX%" == "c" goto CANCEL
 if "%TARGET_INDEX%" == "a" (
@@ -391,7 +475,7 @@ for /F "eol=%EOLTAB% tokens=%ROOTSETUP.APP_TARGET_INDEX% delims= " %%i in ("%ROO
 set "ROOTSETUP.APP_TARGET_SEPARATOR0="
 for /F "eol=%EOLTAB% tokens=%ROOTSETUP.APP_TARGET_INDEX% delims=|" %%i in ("%ROOTSETUP.APP_TARGETS_SEPARATOR_LIST%") do set "ROOTSETUP.APP_TARGET_SEPARATOR0=%%i"
 
-if "%ROOTSETUP.APP_TARGET_NAME%" == "" (
+if not defined ROOTSETUP.APP_TARGET_NAME (
   set /A ROOTSETUP.NUM_APP_TARGETS=%ROOTSETUP.APP_TARGET_INDEX%-1
   exit /b 0
 )
@@ -411,7 +495,7 @@ echo.
 
 set ROOTSETUP.APP_TARGET_INDEX_OK=0
 
-if "%ROOTSETUP.APP_TARGET_INDEX%" == "" goto CHECK_APP_TARGET_INDEX
+if not defined ROOTSETUP.APP_TARGET_INDEX goto CHECK_APP_TARGET_INDEX
 
 if "%ROOTSETUP.APP_TARGET_INDEX%" == "c" goto CANCEL
 
@@ -447,7 +531,7 @@ set /P DELETE_NOT_RELATED_TO_TARGET_FILES=
 echo.
 
 if /i "%DELETE_NOT_RELATED_TO_TARGET_FILES%" == "y" ( set DELETE_NOT_RELATED_TO_TARGET_FILES_OK=1 & goto DELETE_NOT_RELATED_TO_TARGET_FILES_ASK_END )
-if "%DELETE_NOT_RELATED_TO_TARGET_FILES%" == "" ( set DELETE_NOT_RELATED_TO_TARGET_FILES_OK=1 & goto DELETE_NOT_RELATED_TO_TARGET_FILES_ASK_END )
+if not defined DELETE_NOT_RELATED_TO_TARGET_FILES ( set DELETE_NOT_RELATED_TO_TARGET_FILES_OK=1 & goto DELETE_NOT_RELATED_TO_TARGET_FILES_ASK_END )
 if /i "%DELETE_NOT_RELATED_TO_TARGET_FILES%" == "n" goto DELETE_NOT_RELATED_TO_TARGET_FILES_ASK_END
 if /i "%DELETE_NOT_RELATED_TO_TARGET_FILES%" == "c" goto CANCEL
 
@@ -462,7 +546,7 @@ set DELETE_NOT_RELATED_TO_APP_TARGET_FILES_OK=0
 if "%ROOTSETUP.APP_TARGET_NAME%" == "*" goto DELETE_NOT_RELATED_TO_APP_TARGET_FILES_ASK_END
 
 call set "ROOTSETUP_DIR_LIST_TO_REMOVE_INCLUDE_PTTNS=%%ROOTSETUP.%ROOTSETUP.APP_TARGET_NAME%.DIR_LIST_TO_REMOVE_INCLUDE_PTTNS%%"
-if "%ROOTSETUP_DIR_LIST_TO_REMOVE_INCLUDE_PTTNS%" == "" goto DELETE_NOT_RELATED_TO_APP_TARGET_FILES_ASK_END
+if not defined ROOTSETUP_DIR_LIST_TO_REMOVE_INCLUDE_PTTNS goto DELETE_NOT_RELATED_TO_APP_TARGET_FILES_ASK_END
 
 %CECHO% {0F}--------------------------------------------------------------------------------{#}{\n}
 %CECHO% [{0F}EN{#}] {06}Do you want to{#} {0C}DELETE{#} {06}NOT RELATED TO SELECTED SCENARIO/OPTIONS FILES from the installer{#}?{\n}
@@ -480,7 +564,7 @@ set /P DELETE_NOT_RELATED_TO_APP_TARGET_FILES=
 echo.
 
 if /i "%DELETE_NOT_RELATED_TO_APP_TARGET_FILES%" == "y" ( set DELETE_NOT_RELATED_TO_APP_TARGET_FILES_OK=1 & goto DELETE_NOT_RELATED_TO_APP_TARGET_FILES_ASK_END )
-if "%DELETE_NOT_RELATED_TO_APP_TARGET_FILES%" == "" ( set DELETE_NOT_RELATED_TO_APP_TARGET_FILES_OK=1 & goto DELETE_NOT_RELATED_TO_APP_TARGET_FILES_ASK_END )
+if not defined DELETE_NOT_RELATED_TO_APP_TARGET_FILES ( set DELETE_NOT_RELATED_TO_APP_TARGET_FILES_OK=1 & goto DELETE_NOT_RELATED_TO_APP_TARGET_FILES_ASK_END )
 if /i "%DELETE_NOT_RELATED_TO_APP_TARGET_FILES%" == "n" goto DELETE_NOT_RELATED_TO_APP_TARGET_FILES_ASK_END
 if /i "%DELETE_NOT_RELATED_TO_APP_TARGET_FILES%" == "c" goto CANCEL
 
@@ -509,7 +593,7 @@ set /P DELETE_ALL_OTHER_FILES=
 echo.
 
 if /i "%DELETE_ALL_OTHER_FILES%" == "y" ( set DELETE_ALL_OTHER_FILES_OK=1 & goto DELETE_ALL_OTHER_FILES_ASK_NEXT )
-if "%DELETE_ALL_OTHER_FILES%" == "" goto DELETE_ALL_OTHER_FILES_ASK_END
+if not defined DELETE_ALL_OTHER_FILES goto DELETE_ALL_OTHER_FILES_ASK_END
 if /i "%DELETE_ALL_OTHER_FILES%" == "n" goto DELETE_ALL_OTHER_FILES_ASK_END
 if /i "%DELETE_ALL_OTHER_FILES%" == "c" goto CANCEL
 
@@ -541,7 +625,7 @@ set /P DELETE_ALL_OTHER_FILES_IN_GROUP=
 echo.
 
 if /i "%DELETE_ALL_OTHER_FILES_IN_GROUP%" == "y" ( set DELETE_ALL_OTHER_FILES_OK[%DELETE_ALL_OTHER_FILES_INDEX%]=1 & goto DELETE_ALL_OTHER_FILES_IN_GROUP_ASK_NEXT )
-if "%DELETE_ALL_OTHER_FILES_IN_GROUP%" == "" goto DELETE_ALL_OTHER_FILES_IN_GROUP_ASK_NEXT
+if not defined DELETE_ALL_OTHER_FILES_IN_GROUP goto DELETE_ALL_OTHER_FILES_IN_GROUP_ASK_NEXT
 if /i "%DELETE_ALL_OTHER_FILES_IN_GROUP%" == "n" goto DELETE_ALL_OTHER_FILES_IN_GROUP_ASK_NEXT
 if /i "%DELETE_ALL_OTHER_FILES_IN_GROUP%" == "c" goto CANCEL
 
@@ -584,7 +668,7 @@ set "FOUND_APP_TARGET_NAME="
 set "APP_TARGET_PREFIX=ROOTSETUP."
 call :PROCESS_PREFIX_PREINSTALL
 
-if not "%FOUND_APP_TARGET_NAME%" == "" call :DELETE_NOT_RELATED_TO_APP_TARGET_FILES
+if defined FOUND_APP_TARGET_NAME call :DELETE_NOT_RELATED_TO_APP_TARGET_FILES
 
 :DELETE_NOT_RELATED_TO_APP_TARGET_FILES_END
 
@@ -595,7 +679,7 @@ set "FOUND_APP_TARGET_NAME="
 set "APP_TARGET_PREFIX=APPX."
 call :PROCESS_PREFIX_PREINSTALL
 
-if not "%FOUND_APP_TARGET_NAME%" == "" call :DELETE_NOT_RELATED_TO_TARGET_FILES
+if defined FOUND_APP_TARGET_NAME call :DELETE_NOT_RELATED_TO_TARGET_FILES
 
 :DELETE_NOT_RELATED_TO_TARGET_FILES_END
 
@@ -623,7 +707,7 @@ exit /b
 
 :PROCESS_APP_TARGET
 call set "TARGETS_LIST_IN_APP_TARGET=%%%APP_TARGET_PREFIX%%APP_TARGET_NAME%.TARGETS_LIST%%"
-if not "%TARGETS_LIST_IN_APP_TARGET%" == "" (
+if defined TARGETS_LIST_IN_APP_TARGET (
   for %%i in (%TARGETS_LIST_IN_APP_TARGET%) do (
     set "TARGET_NAME_IN_APP_TARGET=%%i"
     call :PROCESS_TARGET_NAME_IN_APP_TARGET || exit /b
@@ -667,8 +751,8 @@ exit /b 0
 :REMOVE_APP_TARGET_EXCLUDE_FILES
 set "APP_TARGET_NAME=%APP_TARGET_TO_REMOVE%"
 call set FILE_LIST_TO_REMOVE_EXCLUDE_PTTNS=%%%APP_TARGET_PREFIX%%APP_TARGET_NAME%.FILE_LIST_TO_REMOVE_EXCLUDE_PTTNS%%
-if not "%FILE_LIST_TO_REMOVE_EXCLUDE_PTTNS%" == "" call set FILE_LIST_TO_REMOVE_EXCLUDE_PTTNS=%FILE_LIST_TO_REMOVE_EXCLUDE_PTTNS%
-if not "%FILE_LIST_TO_REMOVE_EXCLUDE_PTTNS%" == "" (
+if defined FILE_LIST_TO_REMOVE_EXCLUDE_PTTNS call set FILE_LIST_TO_REMOVE_EXCLUDE_PTTNS=%FILE_LIST_TO_REMOVE_EXCLUDE_PTTNS%
+if defined FILE_LIST_TO_REMOVE_EXCLUDE_PTTNS (
   for %%i in (%FILE_LIST_TO_REMOVE_EXCLUDE_PTTNS%) do (
     set FILE_TO_REMOVE_PTTN=%%i
     call :REMOVE_FILE
@@ -679,8 +763,8 @@ exit /b 0
 :REMOVE_APP_TARGET_INCLUDE_DIRS
 set "APP_TARGET_NAME=%APP_TARGET_TO_REMOVE%"
 call set APP_TARGET_DIR_LIST_TO_REMOVE_INCLUDE_PTTNS=%%%APP_TARGET_PREFIX%%APP_TARGET_NAME%.DIR_LIST_TO_REMOVE_INCLUDE_PTTNS%%
-if not "%APP_TARGET_DIR_LIST_TO_REMOVE_INCLUDE_PTTNS%" == "" call set APP_TARGET_DIR_LIST_TO_REMOVE_INCLUDE_PTTNS=%APP_TARGET_DIR_LIST_TO_REMOVE_INCLUDE_PTTNS%
-if not "%APP_TARGET_DIR_LIST_TO_REMOVE_INCLUDE_PTTNS%" == "" (
+if defined APP_TARGET_DIR_LIST_TO_REMOVE_INCLUDE_PTTNS call set APP_TARGET_DIR_LIST_TO_REMOVE_INCLUDE_PTTNS=%APP_TARGET_DIR_LIST_TO_REMOVE_INCLUDE_PTTNS%
+if defined APP_TARGET_DIR_LIST_TO_REMOVE_INCLUDE_PTTNS (
   for %%i in (%APP_TARGET_DIR_LIST_TO_REMOVE_INCLUDE_PTTNS%) do (
     set APP_TARGET_DIR_TO_REMOVE_PTTN=%%i
     call :REMOVE_APP_TARGET_DIR
@@ -797,7 +881,7 @@ exit /b 0
 
 :PROCESS_COPY_WITH_SUBST_FILE_LINE
 set "STR=%~1"
-if not "%STR%" == "" (
+if defined STR (
   if "TARGET_NAME={{TARGET_NAME}}" == "%STR:~0,27%" (
     set "STR=TARGET_NAME=%TARGET_NAME%"
   ) else if "APP_TARGET_NAME={{APPA_APP_TARGET_NAME}}" == "%STR:~0,42%" (
@@ -949,7 +1033,7 @@ call :RESTORE_SYS_CHARS ROOT_PATH
 set "ROOT_PATH_SUFFIX="
 set "ROOT_PATH_SUFFIX_DECORATED="
 
-if "%FILE_PATH_SUFFIX%" == "" goto GET_ROOT_PATH_SUFFIX_DECORATED_EXIT
+if not defined FILE_PATH_SUFFIX goto GET_ROOT_PATH_SUFFIX_DECORATED_EXIT
 
 rem relative or absolute
 if /i not "%ROOT_PATH%\%FILE_PATH_SUFFIX%" == "%FILE_PATH%" set "FILE_PATH_SUFFIX=%FILE_PATH%"
@@ -958,14 +1042,14 @@ if "%FILE_PATH_SUFFIX:~-1%" == "\" set "FILE_PATH_SUFFIX=%FILE_PATH_SUFFIX:~0,-1
 set "ROOT_PATH_SUFFIX_DECORATED=%FILE_PATH_SUFFIX%"
 
 rem ignore characters replace if relative
-if "%FILE_PATH_SUFFIX%" == "" goto IGNORE_ROOT_PATH_SUFFIX_DECORATE
+if not defined FILE_PATH_SUFFIX goto IGNORE_ROOT_PATH_SUFFIX_DECORATE
 if not "%FILE_PATH_SUFFIX:~1,1%" == ":" goto IGNORE_ROOT_PATH_SUFFIX_DECORATE
 
 set "ROOT_PATH_SUFFIX_DECORATED=%ROOT_PATH_SUFFIX_DECORATED::=--%"
 set "ROOT_PATH_SUFFIX_DECORATED=%ROOT_PATH_SUFFIX_DECORATED:\=--%"
 
 :IGNORE_ROOT_PATH_SUFFIX_DECORATE
-if not "%ROOT_PATH_SUFFIX_DECORATED%" == "" set "ROOT_PATH_SUFFIX=%ROOT_PATH_SUFFIX_DECORATED%\"
+if defined ROOT_PATH_SUFFIX_DECORATED set "ROOT_PATH_SUFFIX=%ROOT_PATH_SUFFIX_DECORATED%\"
 
 :GET_ROOT_PATH_SUFFIX_DECORATED_EXIT
 (
@@ -994,7 +1078,7 @@ call :RESTORE_SYS_CHARS ROOT_PATH
 
 set "ROOT_PATH_SUFFIX="
 
-if "%FILE_PATH_SUFFIX%" == "" goto GET_ROOT_PATH_SUFFIX_EXIT
+if not defined FILE_PATH_SUFFIX goto GET_ROOT_PATH_SUFFIX_EXIT
 
 rem relative or absolute
 if /i not "%ROOT_PATH%\%FILE_PATH_SUFFIX%" == "%FILE_PATH%" set "FILE_PATH_SUFFIX=%FILE_PATH%"
@@ -1014,11 +1098,11 @@ setlocal DISABLEDELAYEDEXPANSION
 
 set "__VAR__=%~1"
 
-if "%__VAR__%" == "" exit /b 1
+if not defined __VAR__ exit /b 1
 
 rem ignore empty variables
 call set "STR=%%%__VAR__%%%"
-if "%STR%" == "" exit /b 0
+if not defined STR exit /b 0
 
 set ?00=!
 
@@ -1033,13 +1117,13 @@ set INDEX=1
 :EQUAL_CHAR_REPLACE_LOOP
 set "STR_TMP2="
 for /F "tokens=%INDEX% delims== eol=" %%i in ("/!STR!/") do set STR_TMP2=%%i
-if "!STR_TMP2!" == "" goto EQUAL_CHAR_REPLACE_LOOP_END
+if not defined STR_TMP2 goto EQUAL_CHAR_REPLACE_LOOP_END
 set "STR_TMP=!STR_TMP!!STR_TMP2!?02"
 set /A INDEX+=1
 goto EQUAL_CHAR_REPLACE_LOOP
 
 :EQUAL_CHAR_REPLACE_LOOP_END
-if not "!STR_TMP!" == "" set STR=!STR_TMP:~1,-4!
+if defined STR_TMP set STR=!STR_TMP:~1,-4!
 
 (
   endlocal
@@ -1054,11 +1138,11 @@ setlocal DISABLEDELAYEDEXPANSION
 
 set "__VAR__=%~1"
 
-if "%__VAR__%" == "" exit /b 1
+if not defined __VAR__ exit /b 1
 
 rem ignore empty variables
 call set "STR=%%%__VAR__%%%"
-if "%STR%" == "" exit /b 0
+if not defined STR exit /b 0
 
 setlocal ENABLEDELAYEDEXPANSION
 
@@ -1080,7 +1164,7 @@ set "STR=%STR:?00=!%"
 exit /b 0
 
 :REVERT_POSTPROCESS
-if "%SCRIPT_SELF_REVERT_FROM_PATH%" == "" exit /b 0
+if not defined SCRIPT_SELF_REVERT_FROM_PATH exit /b 0
 
 :REPEAT_COPY_AT_EXIT
 echo.copy: "%SCRIPT_SELF_REVERT_FROM_PATH%" -^> "%SCRIPT_SELF_REVERT_TO_PATH%"

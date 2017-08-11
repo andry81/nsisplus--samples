@@ -41,6 +41,7 @@ preinstall_sample/MS[!!-~]Windows[!!-~]Installer[!!-~]3.1/WindowsInstaller-KB893
 preinstall_sample/MS[!!-~]Windows[!!-~]Installer[!!-~]4.5/Windows6.0-KB942288-v2-x64.msu -text
 preinstall_sample/MS[!!-~]Windows[!!-~]Installer[!!-~]4.5/Windows6.0-KB942288-v2-x86.msu -text
 preinstall_sample/MS[!!-~]Windows[!!-~]Installer[!!-~]4.5/WindowsXP-KB942288-v3-x86.exe -text
+preinstall_sample/MySoftware.reg -text
 preinstall_sample/README_EN.txt -text
 preinstall_sample/ScenarioU/ScenarioU_files_here.txt -text
 preinstall_sample/ScenarioU/subdir_U/ScenarioU_subdir_U_files_here.txt -text
