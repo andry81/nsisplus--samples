@@ -641,8 +641,8 @@ if %DELETE_ALL_OTHER_FILES_INDEX% LSS %DIR_LIST_TO_REMOVE_EXCLUDE_PTTNS_GROUP_NU
 rem --------------------------------------------------------------------------------
 
 %CECHO% {0F}--------------------------------------------------------------------------------{#}{\n}
-%CECHO% [{0F}EN{#}] {0C}WARNING{#}: {06}SCRIPT WILL UPDATE THE SETUP FILES INPLACE, YOU WILL NOT BE ABLE TO UNDO THE CHANGES{#}!{\n}
-%CECHO% [{0F}RU{#}] {0C}бмхлюмхе{#}: {06}яйпхор асдер намнбкърэ/сдюкърэ тюикш хмярюккърнпю, бш ме ялнфере онрнл ху бняярюмнбхрэ{#}!{\n}
+%CECHO% [{0F}EN{#}] {0C}WARNING{#}: {06}SCRIPT WILL UPDATE THE SETUP FILES INPLACE, DO YOU WANT TO PROCEED{#}?{\n}
+%CECHO% [{0F}RU{#}] {0C}бмхлюмхе{#}: {06}яйпхор асдер намнбкърэ/сдюкърэ тюикш хмярюккърнпю, опхярсохрэ{#}?{\n}
 echo.
 
 :TARGET_NAME_SELECT_REPEAT
