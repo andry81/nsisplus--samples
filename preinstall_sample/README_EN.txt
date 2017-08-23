@@ -1,5 +1,5 @@
 * README_EN.txt
-* 2017.06.22
+* 2017.08.24
 * preinstall_sample
 
 1. DESCRIPTION
@@ -93,9 +93,8 @@ Usually the script asks these set of questions:
 4. Asks to delete files and folders not related to the selected scenario to
    handle.
 5. Asks to select for delete files and folders from predefined set by groups.
-6. Asks to confirm the setup catalog for unrestorable modifications
-   (most of operations still can be reverted in some conditions, see the flag
-   -revert below).
+6. Asks to confirm the setup catalog for modifications
+   (the operation can be reverted, see the `-revert` flag below).
 7. Removes files and folders not related to the selected logical target.
 8. Removes files and folders not related to the selected scenario to handle.
 9. Removes files and folders from predefined set by groups.
