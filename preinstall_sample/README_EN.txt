@@ -17,8 +17,8 @@ all projects linked to the NsisSetupLib libraries.
 The latest version is here: sf.net/p/nsisplus
 
 WARNING:
-  Use the SVN access to find out new functionality and bug fixes:
-    https://svn.code.sf.net/p/nsisplus/NsisSetupSamples/trunk
+  Use the SVN access to find out new functionality and bug fixes.
+  See the REPOSITORIES section.
 
 -------------------------------------------------------------------------------
 2. REPOSITORIES
