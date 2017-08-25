@@ -1,5 +1,5 @@
 * README_EN.txt
-* 2017.08.24
+* 2017.08.25
 * preinstall_sample
 
 1. DESCRIPTION
@@ -25,8 +25,10 @@ WARNING:
 -------------------------------------------------------------------------------
 Primary:
   * https://svn.code.sf.net/p/nsisplus/NsisSetupSamples/trunk
-Secondary:
+First mirror:
   * https://github.com/andry81/nsisplus--NsisSetupSamples.git
+Second mirror:
+  * https://bitbucket.org/andry81/nsisplus-NsisSetupSamples.git
 
 -------------------------------------------------------------------------------
 3. SETUP CATALOG CONTENT DESCRIPTION
