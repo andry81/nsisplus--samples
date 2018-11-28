@@ -14,7 +14,7 @@ Initial sample of setup catalog with the preinstall tools. The catalog is a
 result of a build set of related projects including main setup project, where
 all projects linked to the NsisSetupLib libraries.
 
-The latest version is here: sf.net/p/nsisplus
+The latest version is here: https://sf.net/p/nsisplus
 
 WARNING:
   Use the SVN access to find out new functionality and bug fixes.
