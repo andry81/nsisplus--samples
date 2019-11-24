@@ -1,5 +1,5 @@
 * README_EN.txt
-* 2017.08.25
+* 2019.11.24
 * preinstall_sample
 
 1. DESCRIPTION
@@ -24,11 +24,14 @@ WARNING:
 2. REPOSITORIES
 -------------------------------------------------------------------------------
 Primary:
-  * https://svn.code.sf.net/p/nsisplus/NsisSetupSamples/trunk
+  * https://sf.net/p/nsisplus/NsisSetupSamples/HEAD/tree/trunk/
+    https://svn.code.sf.net/p/nsisplus/NsisSetupSamples/trunk
 First mirror:
-  * https://github.com/andry81/nsisplus--NsisSetupSamples.git
+  * https://github.com/andry81/nsisplus--NsisSetupSamples/tree/trunk
+    https://github.com/andry81/nsisplus--NsisSetupSamples.git
 Second mirror:
-  * https://bitbucket.org/andry81/nsisplus-NsisSetupSamples.git
+  * https://bitbucket.org/andry81/nsisplus-NsisSetupSamples/src/trunk
+    https://bitbucket.org/andry81/nsisplus-NsisSetupSamples.git
 
 -------------------------------------------------------------------------------
 3. SETUP CATALOG CONTENT DESCRIPTION

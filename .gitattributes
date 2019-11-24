@@ -50,6 +50,7 @@ preinstall_sample/ScenarioV/subdir_V/ScenarioV_subdir_V_files_here.txt -text
 preinstall_sample/ScenarioW/ScenarioW_files_here.txt -text
 preinstall_sample/ScenarioW/subdir_W/ScenarioW_subdir_W_files_here.txt -text
 preinstall_sample/Tools/cecho.exe -text
+preinstall_sample/changelog.txt -text
 preinstall_sample/preinstall.bat -text
 preinstall_sample/setup.exe.dat -text
 preinstall_sample/setup.ini -text
