@@ -1,11 +1,11 @@
 * README_EN.txt
-* 2019.11.24
+* 2020.02.10
 * preinstall_sample
 
 1. DESCRIPTION
 2. REPOSITORIES
 3. SETUP CATALOG CONTENT DESCRIPTION
-4. AUTHOR EMAIL
+4. AUTHOR
 
 -------------------------------------------------------------------------------
 1. DESCRIPTION
@@ -123,6 +123,6 @@ The script must run on a clean system without any preinstalled components and
 libraries.
 
 -------------------------------------------------------------------------------
-4. AUTHOR EMAIL
+4. AUTHOR
 -------------------------------------------------------------------------------
 Andrey Dibrov (andry at inbox dot ru)
