@@ -1,4 +1,5 @@
 * text=auto !eol
+.github/FUNDING.yml -text
 preinstall_sample/ApplicationA/ApplicationA.7z -text
 preinstall_sample/ApplicationA/SetupApplicationA.exe.dat -text
 preinstall_sample/ApplicationA/setup.ini -text
