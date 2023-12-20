@@ -1,6 +1,6 @@
 * README_EN.txt
-* 2020.02.10
-* preinstall_sample
+* 2023.12.20
+* nsisplus--samples/preinstall_sample
 
 1. DESCRIPTION
 2. REPOSITORIES
@@ -14,24 +14,18 @@ Initial sample of setup catalog with the preinstall tools. The catalog is a
 result of a build set of related projects including main setup project, where
 all projects linked to the NsisSetupLib libraries.
 
-The latest version is here: https://sf.net/p/nsisplus
-
-WARNING:
-  Use the SVN access to find out new functionality and bug fixes.
-  See the REPOSITORIES section.
-
 -------------------------------------------------------------------------------
 2. REPOSITORIES
 -------------------------------------------------------------------------------
 Primary:
-  * https://sf.net/p/nsisplus/NsisSetupSamples/HEAD/tree/trunk/
-    https://svn.code.sf.net/p/nsisplus/NsisSetupSamples/trunk
+  * https://github.com/andry81/nsisplus--samples/branches
+    https://github.com/andry81/nsisplus--samples
 First mirror:
-  * https://github.com/andry81/nsisplus--NsisSetupSamples/tree/trunk
-    https://github.com/andry81/nsisplus--NsisSetupSamples.git
+  * https://sf.net/p/nsisplus/nsisplus--samples/ci/master/tree
+    https://git.code.sf.net/p/nsisplus/nsisplus--samples
 Second mirror:
-  * https://bitbucket.org/andry81/nsisplus-NsisSetupSamples/src/trunk
-    https://bitbucket.org/andry81/nsisplus-NsisSetupSamples.git
+  * https://gitlab.com/andry81/nsisplus-samples/-/branches
+    https://gitlab.com/andry81/nsisplus-samples.git
 
 -------------------------------------------------------------------------------
 3. SETUP CATALOG CONTENT DESCRIPTION
